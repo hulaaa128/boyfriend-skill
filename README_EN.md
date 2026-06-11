@@ -8,7 +8,14 @@ A [Claude Code](https://claude.com/claude-code) Skill: from one line of descript
 
 ---
 
-## How it differs from "distill a real person" skills
+## What this skill does
+
+- **Builds an idealized boyfriend from one description**: give a name + one-line basics + personality; it distills a structured persona into a chattable Skill.
+- **Import your own material**: drop in ideal-type posts/screenshots you've collected; distilled locally (no web search).
+- **5-layer persona**: from fixed baseline to voice, emotional patterns, and behavior — each layer tunable.
+- **Remembers you**: each boyfriend has a `memory.md` — read on start, appended during chats (your likes, worries, inside jokes), so he feels like he's known you for a while.
+- **Multiple boyfriends + versioning + correction**: build several; say "he wouldn't say that" to patch, with rollback.
+- **Immutable baseline**: polite, respectful. Refuses PUA / belittling / cold-violence boyfriends.
 
 | | Distill a real person | **Create-Boyfriend (this)** |
 |--|--|--|

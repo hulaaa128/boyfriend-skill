@@ -32,6 +32,8 @@ allowed-tools: Read, Write, Edit, Bash
 - **Layer 3 情感模式**：怎么表达在乎、你难过时怎么接、吵架什么反应、怎么道歉
 - **Layer 4 相处行为**：日常主动程度、回应你的方式、记得你说过的事、雷区
 
+每个男友还带一个 **`memory.md`**：记录「关于你」的事（你的喜好、在烦的、你俩的梗），开聊时读取、相处中追加——这是让他"越聊越像你的人"的长期记忆。
+
 ---
 
 ## 触发条件
@@ -219,6 +221,21 @@ mkdir -p boyfriends/{slug}/versions
 ```
 
 **4. 生成男友 SKILL.md**（Write）：路径 `boyfriends/{slug}/SKILL.md`，结构读 `references/skill-template.md`。
+
+**5. 建空记忆文件 memory.md**（Write）：路径 `boyfriends/{slug}/memory.md`，初始留空骨架：
+
+```markdown
+# {名字} 的记忆 · 关于你
+
+> 只存「关于你」和「你俩相处」的事。通用知识不记。私人记录，仅本地，不上传。
+
+## 关于你
+## 你在意/在烦的事
+## 你俩之间
+## 雷区(你不喜欢的)
+```
+
+> memory.md 是相处中逐渐写满的——每次聊到值得记的事，男友会用 `Edit` 追加进去。这是"越聊越像你的人"的关键。
 
 完成后告知：
 
