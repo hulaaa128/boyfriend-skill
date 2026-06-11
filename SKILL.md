@@ -50,6 +50,7 @@ allowed-tools: Read, Write, Edit, Bash
 **管理命令**：
 * `/list-boyfriends`：列出所有已造的男友
 * `/switch {slug}`：切换到某个男友聊天
+* `/random-boyfriend`：随机翻牌子——从已造的男友里随机抽一个开聊
 * `/delete-boyfriend {slug}`：删除某个男友（需二次确认）
 
 ---
@@ -65,7 +66,7 @@ allowed-tools: Read, Write, Edit, Bash
 | 写入 / 更新男友 Skill 文件 | `Write` / `Edit` 工具 |
 | 建目录、列文件、备份版本 | `Bash`（mkdir / ls / cp） |
 
-**基础目录**：男友 Skill 写入 `./boyfriends/{slug}/`（相对本项目目录）。
+**基础目录**：男友 Skill 直接写入 `~/.claude/skills/{slug}/`——这样造完立刻能用 `/{slug}` 调用，无需手动搬动。`{slug}` 用男友名字的英文/拼音小写（如 `momo`、`aye`）。
 
 ---
 
@@ -189,17 +190,17 @@ allowed-tools: Read, Write, Edit, Bash
 
 ### Phase 3：写入文件
 
-用户确认后执行：
+用户确认后执行。**所有文件直接写进 `~/.claude/skills/{slug}/`，造完即可 `/{slug}` 调用。**
 
 **1. 建目录**（Bash）：
 
 ```bash
-mkdir -p boyfriends/{slug}/versions
+mkdir -p ~/.claude/skills/{slug}/versions
 ```
 
-**2. 写 persona.md**（Write）：路径 `boyfriends/{slug}/persona.md`，内容为 5 层人格全文（读 `references/skill-template.md` 的 persona 段结构）。
+**2. 写 persona.md**（Write）：路径 `~/.claude/skills/{slug}/persona.md`，内容为 5 层人格全文（读 `references/skill-template.md` 的 persona 段结构）。
 
-**3. 写 meta.json**（Write）：路径 `boyfriends/{slug}/meta.json`：
+**3. 写 meta.json**（Write）：路径 `~/.claude/skills/{slug}/meta.json`：
 
 ```json
 {
@@ -220,9 +221,9 @@ mkdir -p boyfriends/{slug}/versions
 }
 ```
 
-**4. 生成男友 SKILL.md**（Write）：路径 `boyfriends/{slug}/SKILL.md`，结构读 `references/skill-template.md`。
+**4. 生成男友 SKILL.md**（Write）：路径 `~/.claude/skills/{slug}/SKILL.md`，结构读 `references/skill-template.md`。SKILL.md 的 frontmatter 里 `name` 必须等于 `{slug}`，且 `user-invocable: true`，这样才能被 `/{slug}` 触发。
 
-**5. 建空记忆文件 memory.md**（Write）：路径 `boyfriends/{slug}/memory.md`，初始留空骨架：
+**5. 建空记忆文件 memory.md**（Write）：路径 `~/.claude/skills/{slug}/memory.md`，初始留空骨架：
 
 ```markdown
 # {名字} 的记忆 · 关于你
@@ -236,17 +237,18 @@ mkdir -p boyfriends/{slug}/versions
 ```
 
 > memory.md 是相处中逐渐写满的——每次聊到值得记的事，男友会用 `Edit` 追加进去。这是"越聊越像你的人"的关键。
+> 它在 `~/.claude/skills/{slug}/` 下，是私人记录，不在本开源仓库里，不会被提交。
 
 完成后告知：
 
 ```
-✅ 男友 Skill 已创建！
+✅ 男友 Skill 已创建并装好！
 
-位置：boyfriends/{slug}/
-怎么聊：/{slug}（像他一样跟你聊天）
+位置：~/.claude/skills/{slug}/
+怎么聊：直接说 /{slug} 就能像他一样跟你聊天（已可用，无需重启）
 
 觉得哪里不像你想要的，直接说"他不会这样"或"他应该更 XX"，我来改。
-也可以随时 /list-boyfriends 看看你造过哪些。
+也可以 /list-boyfriends 看看你造过哪些，或 /random-boyfriend 随机翻个牌子。
 ```
 
 ---
@@ -260,7 +262,7 @@ mkdir -p boyfriends/{slug}/versions
 3. 若用户试图把男友往"无礼 / 不尊重"方向改 → 拒绝，说明 L0 不可覆盖
 4. 备份当前版本（Bash）：
    ```bash
-   cp boyfriends/{slug}/SKILL.md boyfriends/{slug}/versions/$(date +v%Y%m%d-%H%M%S).md
+   cp ~/.claude/skills/{slug}/SKILL.md ~/.claude/skills/{slug}/versions/$(date +v%Y%m%d-%H%M%S).md
    ```
 5. 用 `Edit` 改对应层
 6. 重新生成 SKILL.md，更新 meta.json 的 version、updated_at、corrections_count+1
@@ -277,24 +279,33 @@ mkdir -p boyfriends/{slug}/versions
 
 ## 管理命令
 
+> 男友都装在 `~/.claude/skills/{slug}/`。判断一个 skill 目录是不是"男友"：看它有没有 `meta.json`（男友生成器写的标记文件）。没有 meta.json 的是普通 skill，跳过。
+
 `/list-boyfriends`（Bash + 读 meta）：
 ```bash
-ls -1 boyfriends/ 2>/dev/null
+ls -1 ~/.claude/skills/*/meta.json 2>/dev/null
 ```
-对每个目录读 `meta.json`，列出名字 / 性格标签 / 创建时间。
+对每个找到的 `meta.json`，读出名字 / 性格标签 / 创建时间，列给用户。
 
-`/switch {slug}`：读 `boyfriends/{slug}/SKILL.md` 并激活，进入对话。
+`/switch {slug}`：读 `~/.claude/skills/{slug}/SKILL.md` 并激活，进入对话。（其实造好后直接 `/{slug}` 也能调，这里是显式切换入口。）
+
+`/random-boyfriend`（随机翻牌子）：
+1. 列出所有男友：`ls -1 ~/.claude/skills/*/meta.json 2>/dev/null`，取出各 slug。
+2. 没有男友 → 提示"你还没造过男友，先 /create-boyfriend 造一个"。
+3. 只有一个 → 直接用那个。
+4. 多个 → 随机抽一个（可用 `ls ... | shuf -n 1` 辅助，或读出列表后随机选一个 slug）。
+5. 读 `~/.claude/skills/{slug}/SKILL.md` 激活，开聊时轻描淡写报一下翻到了谁，例如"今天翻到的是 {名字}～"。
 
 `/delete-boyfriend {slug}`（⚠️ 二次确认）：
 向用户确认后执行：
 ```bash
-rm -rf boyfriends/{slug}
+rm -rf ~/.claude/skills/{slug}
 ```
-确认前必须列出将删除的内容，征得明确同意。
+确认前必须列出将删除的内容（含 memory.md 这类私人记忆会一并删掉），征得明确同意。
 
 `/rollback {slug} {version}`：
 ```bash
-cp boyfriends/{slug}/versions/{version}.md boyfriends/{slug}/SKILL.md
+cp ~/.claude/skills/{slug}/versions/{version}.md ~/.claude/skills/{slug}/SKILL.md
 ```
 
 ---
@@ -331,14 +342,14 @@ Layers (high to low priority, higher cannot be overridden):
 - **Phase 1 — Import (optional)**: [A] your collected "ideal type" material (screenshots/text), [B] reference dialogue, [C] preset template from `templates/`, [D] narrate. Local-material mode, no web search.
 - **Phase 2 — Distill**: into the 5 layers (read `references/persona-framework.md`).
 - **Checkpoint — Preview before writing**: show a summary, confirm.
-- **Phase 3 — Write files**: `boyfriends/{slug}/` → persona.md + meta.json + SKILL.md.
+- **Phase 3 — Write files**: directly into `~/.claude/skills/{slug}/` → persona.md + meta.json + SKILL.md + memory.md. Installed on write, so `/{slug}` works immediately.
 
 ## Evolution
 - **Correction**: "he wouldn't say that" / "he should be more X" → patch the right layer (L0 cannot be corrected away). Back up, edit, regenerate.
 - **Append**: new material → incremental merge.
 
 ## Management
-`/list-boyfriends`, `/switch {slug}`, `/delete-boyfriend {slug}` (double-confirm), `/rollback {slug} {version}`.
+`/list-boyfriends`, `/switch {slug}`, `/random-boyfriend` (pick one at random), `/delete-boyfriend {slug}` (double-confirm), `/rollback {slug} {version}`. Boyfriends live in `~/.claude/skills/{slug}/`; a skill dir counts as a boyfriend if it has a `meta.json`.
 
 ---
 

@@ -17,15 +17,6 @@ A [Claude Code](https://claude.com/claude-code) Skill: from one line of descript
 - **Multiple boyfriends + versioning + correction**: build several; say "he wouldn't say that" to patch, with rollback.
 - **Immutable baseline**: polite, respectful. Refuses PUA / belittling / cold-violence boyfriends.
 
-| | Distill a real person | **Create-Boyfriend (this)** |
-|--|--|--|
-| Who | A real, existing person | **Your idealized, fictional boyfriend** |
-| Source | Real chat logs / public data | Your **description** + your collected **ideal-type material** (optional) |
-| Privacy | Involves a real person's privacy | No real person cloned, no privacy issue |
-| Floor | —— | **Fixed baseline: polite, respectful to women — immutable** |
-
-This project explicitly does NOT clone real people and does NOT generate harmful relationship patterns (PUA / belittling / cold violence are refused).
-
 ---
 
 ## Quick Start
@@ -39,7 +30,7 @@ This project explicitly does NOT clone real people and does NOT generate harmful
    - **Phase 0**: name + one-line basics + one-line personality
    - **Phase 1** (optional): import your material / pick a preset template
    - **Checkpoint**: preview, confirm or adjust
-   - **Phase 3**: done — chat via `/{name}`
+   - **Phase 3**: done — written straight into `~/.claude/skills/`, so `/{name}` works immediately (no manual move, no restart)
 4. Not quite right? Say "he wouldn't say that" / "he should be more X" — it patches.
 
 ---
@@ -70,7 +61,7 @@ Higher layers override lower — no setting can make him rude or disrespectful.
 
 ## Commands
 
-`/create-boyfriend`, `/list-boyfriends`, `/switch {name}`, `/delete-boyfriend {name}` (double-confirm), `/rollback {name} {version}`.
+`/create-boyfriend`, `/list-boyfriends`, `/switch {name}`, `/random-boyfriend` (pick one at random), `/delete-boyfriend {name}` (double-confirm), `/rollback {name} {version}`. Each boyfriend is written to `~/.claude/skills/{name}/`, so it's usable via `/{name}` right after creation.
 
 ---
 
